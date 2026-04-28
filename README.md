@@ -66,16 +66,14 @@ MusicXML/MIDI dataset
 
 ## Documentation
 
-Wiki-style documentation lives in `docs/wiki/`:
+Documentation lives in the [GitHub Wiki](https://github.com/ezrasong/sightreader/wiki):
 
-- `Home.md`
-- `Project-Overview.md`
-- `Architecture.md`
-- `Generation-Pipeline.md`
-- `Training-Plan.md`
-- `Data-and-Licensing.md`
-- `Evaluation.md`
-- `Development.md`
-- `Roadmap.md`
-
-These files are written so they can be copied into a GitHub Wiki or kept as normal repository docs.
+- [Home](https://github.com/ezrasong/sightreader/wiki)
+- [Project Overview](https://github.com/ezrasong/sightreader/wiki/Project-Overview)
+- [Architecture](https://github.com/ezrasong/sightreader/wiki/Architecture)
+- [Generation Pipeline](https://github.com/ezrasong/sightreader/wiki/Generation-Pipeline)
+- [Training Plan](https://github.com/ezrasong/sightreader/wiki/Training-Plan)
+- [Data and Licensing](https://github.com/ezrasong/sightreader/wiki/Data-and-Licensing)
+- [Evaluation](https://github.com/ezrasong/sightreader/wiki/Evaluation)
+- [Development](https://github.com/ezrasong/sightreader/wiki/Development)
+- [Roadmap](https://github.com/ezrasong/sightreader/wiki/Roadmap)

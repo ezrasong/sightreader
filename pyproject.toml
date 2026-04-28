@@ -1,0 +1,16 @@
+[project]
+name = "sightreader-ai"
+version = "0.1.0"
+description = "Symbolic AI prototype for sight-reading exercise generation"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+train = ["torch>=2.2"]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+

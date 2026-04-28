@@ -9,6 +9,7 @@ from sightreader_ai.export import export_piece
 from sightreader_ai.generator import ExerciseGenerator, GenerationOptions
 from sightreader_ai.tokenizer import SightReadingTokenizer
 from sightreader_ai.validator import validate_piece
+from training.train_transformer import _make_examples, _split_examples
 
 
 class GeneratorTests(unittest.TestCase):
@@ -42,6 +43,18 @@ class GeneratorTests(unittest.TestCase):
         self.assertEqual(tokens[0], "LEVEL_1")
         self.assertIn("KEY_C", tokens)
         self.assertEqual(tokens[-1], "EOS")
+
+    def test_training_examples_use_overlapping_windows(self) -> None:
+        examples = _make_examples([[1, 2, 3, 4, 5, 6, 7]], context=3, stride=2)
+
+        self.assertEqual(examples, [[1, 2, 3, 4], [3, 4, 5, 6], [4, 5, 6, 7]])
+
+    def test_training_split_keeps_validation_when_available(self) -> None:
+        examples = [[1, 2], [2, 3], [3, 4]]
+        train_examples, val_examples = _split_examples(examples, val_split=0.1, seed=4)
+
+        self.assertEqual(len(train_examples), 2)
+        self.assertEqual(len(val_examples), 1)
 
 
 if __name__ == "__main__":

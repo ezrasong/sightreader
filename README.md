@@ -48,14 +48,6 @@ training/
   train_transformer.py  Minimal PyTorch decoder-only Transformer
 ```
 
-## Repository Name
-
-Recommended repository name: `sightreader-ai`
-
-Display name: `SightReader AI`
-
-The package import name is `sightreader_ai`.
-
 ## Model Direction
 
 The Transformer should learn tokenized symbolic music, not audio. A generated piece should pass through the validator before the app shows it to a student.

@@ -75,7 +75,7 @@ def major_scale_pitches(key: str, low: int, high: int) -> list[int]:
 
 @dataclass(frozen=True)
 class NoteEvent:
-    pitch: int
+    pitch: int | None
     duration: Fraction
     measure: int
     beat: Fraction
@@ -83,10 +83,13 @@ class NoteEvent:
 
     @property
     def pitch_name(self) -> str:
+        if self.pitch is None:
+            return "REST"
         return midi_to_pitch_name(self.pitch)
 
     def to_json(self) -> dict[str, object]:
         return {
+            "rest": self.pitch is None,
             "pitch": self.pitch_name,
             "midi": self.pitch,
             "duration": str(self.duration),
@@ -135,7 +138,7 @@ class Piece:
         tempo_bpm: int,
         level: int,
         measures: int,
-        pitches_and_durations: Iterable[tuple[int, Fraction]],
+        pitches_and_durations: Iterable[tuple[int | None, Fraction]],
     ) -> "Piece":
         beats_per_measure = Fraction(time_signature[0] * 4, time_signature[1])
         notes: list[NoteEvent] = []

@@ -20,10 +20,11 @@ class SightReadingTokenizer:
             if note.measure != current_measure:
                 tokens.append("BAR")
                 current_measure = note.measure
+            pitch_token = "REST" if note.pitch is None else f"PITCH_{midi_to_pitch_name(note.pitch)}"
             tokens.extend(
                 [
                     f"POS_{_fraction_token(note.beat)}",
-                    f"PITCH_{midi_to_pitch_name(note.pitch)}",
+                    pitch_token,
                     f"DUR_{_fraction_token(note.duration)}",
                 ]
             )

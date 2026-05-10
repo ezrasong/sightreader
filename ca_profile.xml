@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Maintainer>
+  <Icon>https://raw.githubusercontent.com/ezrasong/sightreader/unraid-template/icons/sightreader-ai.svg</Icon>
+  <Profile>SightReader AI builds curriculum-shaped symbolic music datasets and trains a small Transformer for level-appropriate sight-reading exercise generation.</Profile>
+  <WebPage>https://github.com/ezrasong/sightreader</WebPage>
+  <Forum>https://github.com/ezrasong/sightreader/issues</Forum>
+</Maintainer>

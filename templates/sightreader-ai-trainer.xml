@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Beta>True</Beta>
+  <Category>Tools: Productivity: Other:</Category>
+  <Date>2026-05-10</Date>
+  <TemplateURL>https://raw.githubusercontent.com/ezrasong/sightreader/unraid-template/templates/sightreader-ai-trainer.xml</TemplateURL>
+  <Icon>https://raw.githubusercontent.com/ezrasong/sightreader/unraid-template/icons/sightreader-ai.svg</Icon>
+  <Name>SightReader-AI-Trainer</Name>
+  <Repository>ghcr.io/ezrasong/sightreader:unraid-template</Repository>
+  <Registry>https://github.com/ezrasong/sightreader/pkgs/container/sightreader</Registry>
+  <Support>https://github.com/ezrasong/sightreader/issues</Support>
+  <Project>https://github.com/ezrasong/sightreader</Project>
+  <Overview>Builds curriculum-shaped symbolic sight-reading datasets and trains the Transformer model. The container exits when the selected job finishes, while generated datasets and model checkpoints stay in the mapped data path.</Overview>
+  <WebUI/>
+  <Network>bridge</Network>
+  <MyIP/>
+  <Shell>bash</Shell>
+  <Privileged>false</Privileged>
+  <ExtraParams>--runtime=nvidia</ExtraParams>
+  <PostArgs>all</PostArgs>
+  <CPUset/>
+  <DonateText/>
+  <DonateLink/>
+  <Requires>For GPU training, install the Unraid Nvidia-Driver plugin. For CPU-only training, clear Extra Parameters and set DEVICE to cpu.</Requires>
+  <BaseImage>pytorch/pytorch:latest</BaseImage>
+  <Branch>unraid-template</Branch>
+  <License>MIT</License>
+  <GitHub>https://github.com/ezrasong/sightreader</GitHub>
+  <Config Name="Data Path" Target="/data" Default="/mnt/cache/appdata/sightreader" Mode="rw" Description="Persistent folder for generated datasets, vocab files, checkpoints, and models." Type="Path" Display="always" Required="true" Mask="false">/mnt/cache/appdata/sightreader</Config>
+  <Config Name="Visible GPUs" Target="NVIDIA_VISIBLE_DEVICES" Default="all" Mode="" Description="NVIDIA devices exposed to the container. Use all, a GPU UUID, or clear this for CPU-only runs." Type="Variable" Display="always" Required="false" Mask="false">all</Config>
+  <Config Name="Driver Capabilities" Target="NVIDIA_DRIVER_CAPABILITIES" Default="compute,utility" Mode="" Description="NVIDIA driver capabilities needed for PyTorch training." Type="Variable" Display="advanced" Required="false" Mask="false">compute,utility</Config>
+  <Config Name="Device" Target="DEVICE" Default="auto" Mode="" Description="Training device: auto, cuda, or cpu." Type="Variable" Display="always" Required="true" Mask="false">auto</Config>
+  <Config Name="Pieces Per Level" Target="PIECES_PER_LEVEL" Default="200" Mode="" Description="Synthetic pieces generated for each curriculum level." Type="Variable" Display="always" Required="true" Mask="false">200</Config>
+  <Config Name="Bars" Target="BARS" Default="8" Mode="" Description="Bars per generated synthetic exercise." Type="Variable" Display="always" Required="true" Mask="false">8</Config>
+  <Config Name="Levels" Target="LEVELS" Default="" Mode="" Description="Optional space-separated levels, for example: 1 2 3. Leave blank for the full curriculum." Type="Variable" Display="always" Required="false" Mask="false"/>
+  <Config Name="Epochs" Target="EPOCHS" Default="20" Mode="" Description="Training epochs." Type="Variable" Display="always" Required="true" Mask="false">20</Config>
+  <Config Name="Batch Size" Target="BATCH_SIZE" Default="32" Mode="" Description="Training batch size." Type="Variable" Display="advanced" Required="true" Mask="false">32</Config>
+  <Config Name="Context" Target="CONTEXT" Default="256" Mode="" Description="Token context length." Type="Variable" Display="advanced" Required="true" Mask="false">256</Config>
+  <Config Name="Stride" Target="STRIDE" Default="128" Mode="" Description="Stride for overlapping token windows." Type="Variable" Display="advanced" Required="true" Mask="false">128</Config>
+  <Config Name="Validation Split" Target="VAL_SPLIT" Default="0.1" Mode="" Description="Fraction of examples reserved for validation." Type="Variable" Display="advanced" Required="true" Mask="false">0.1</Config>
+  <Config Name="Seed" Target="SEED" Default="1337" Mode="" Description="Random seed for dataset generation and training." Type="Variable" Display="advanced" Required="true" Mask="false">1337</Config>
+</Container>

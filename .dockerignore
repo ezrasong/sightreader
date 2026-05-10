@@ -1,0 +1,13 @@
+.git
+.github
+.tmp
+.venv
+__pycache__
+*.pyc
+*.pyo
+*.egg-info
+build
+dist
+data
+models
+outputs

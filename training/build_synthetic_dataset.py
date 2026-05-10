@@ -5,6 +5,7 @@ import json
 import random
 from pathlib import Path
 
+from sightreader_ai.difficulty import available_levels, get_profile
 from sightreader_ai.generator import ExerciseGenerator, GenerationOptions
 from sightreader_ai.tokenizer import SightReadingTokenizer
 
@@ -15,7 +16,7 @@ def main() -> None:
     )
     parser.add_argument("--out", type=Path, default=Path("data/token_sequences.jsonl"))
     parser.add_argument("--vocab-out", type=Path, default=Path("data/vocab.json"))
-    parser.add_argument("--levels", type=int, nargs="+", default=[1, 2, 3])
+    parser.add_argument("--levels", type=int, nargs="+", default=list(available_levels()))
     parser.add_argument("--pieces-per-level", type=int, default=200)
     parser.add_argument("--bars", type=int, default=8)
     parser.add_argument("--seed", type=int, default=1337)
@@ -46,6 +47,7 @@ def build_dataset(
     token_sequences: list[list[str]] = []
 
     for level in levels:
+        profile = get_profile(level)
         generator = ExerciseGenerator(seed=rng.randrange(1_000_000_000))
         for index in range(pieces_per_level):
             piece_seed = rng.randrange(1_000_000_000)
@@ -59,7 +61,7 @@ def build_dataset(
             )
             tokens = ["BOS", *tokenizer.encode(piece)]
             token_sequences.append(tokens)
-            rows.append({"level": level, "seed": piece_seed, "tokens": tokens})
+            rows.append({"level": level, "profile": profile.name, "seed": piece_seed, "tokens": tokens})
 
     vocab = tokenizer.build_vocab(token_sequences)
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -75,6 +77,7 @@ def build_dataset(
                     {
                         "ids": tokenizer.ids(tokens, vocab),
                         "level": row["level"],
+                        "profile": row["profile"],
                         "seed": row["seed"],
                     }
                 )

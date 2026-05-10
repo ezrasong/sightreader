@@ -49,7 +49,15 @@ class ExerciseGenerator:
         tonic = min(tonic_candidates, key=lambda pitch: abs(pitch - scale[len(scale) // 2]))
 
         durations = self._make_rhythm(profile, bars, rng)
-        pitches = self._make_melody(scale, tonic, len(durations), profile.max_interval, rng)
+        pitches = self._make_melody(
+            scale=scale,
+            tonic=tonic,
+            count=len(durations),
+            max_interval=profile.max_interval,
+            max_scale_step=profile.max_scale_step,
+            rng=rng,
+        )
+        pitches = self._apply_rests(pitches, profile.rest_probability, rng)
         return Piece.from_notes(
             title=title,
             key=key,
@@ -77,7 +85,7 @@ class ExerciseGenerator:
                 if measure_index == bars - 1 and remaining in candidates:
                     duration = remaining
                 else:
-                    weights = [self._duration_weight(duration, profile.level) for duration in candidates]
+                    weights = [profile.duration_weight(duration) for duration in candidates]
                     duration = rng.choices(candidates, weights=weights, k=1)[0]
                 durations.append(duration)
                 remaining -= duration
@@ -85,16 +93,17 @@ class ExerciseGenerator:
 
     def _make_melody(
         self,
+        *,
         scale: list[int],
         tonic: int,
         count: int,
         max_interval: int,
+        max_scale_step: int,
         rng: random.Random,
     ) -> list[int]:
         current = tonic
         pitches: list[int] = []
-        weighted_steps = [0, 1, -1, 2, -2, 3, -3]
-        weights = [0.16, 0.25, 0.25, 0.12, 0.12, 0.05, 0.05]
+        weighted_steps, weights = self._scale_step_weights(max_scale_step)
 
         for index in range(count):
             if index == count - 1:
@@ -114,16 +123,34 @@ class ExerciseGenerator:
         return pitches
 
     @staticmethod
-    def _duration_weight(duration: Fraction, level: int) -> float:
-        if level == 1:
-            return {Fraction(1): 0.65, Fraction(2): 0.28, Fraction(4): 0.07}.get(duration, 0.01)
-        if duration == Fraction(1, 2):
-            return 0.22
-        if duration == Fraction(1):
-            return 0.48
-        if duration == Fraction(2):
-            return 0.22
-        return 0.08
+    def _scale_step_weights(max_scale_step: int) -> tuple[list[int], list[float]]:
+        steps = [0]
+        weights = [0.22]
+        for distance in range(1, max_scale_step + 1):
+            weight = 0.36 / distance
+            steps.extend((distance, -distance))
+            weights.extend((weight, weight))
+        return steps, weights
+
+    @staticmethod
+    def _apply_rests(
+        pitches: list[int],
+        rest_probability: float,
+        rng: random.Random,
+    ) -> list[int | None]:
+        if rest_probability <= 0:
+            return list(pitches)
+
+        last_index = len(pitches) - 1
+        output: list[int | None] = []
+        for index, pitch in enumerate(pitches):
+            if index in (0, last_index):
+                output.append(pitch)
+            elif rng.random() < rest_probability:
+                output.append(None)
+            else:
+                output.append(pitch)
+        return output
 
     @staticmethod
     def _nearest_chord_tone(scale: list[int], tonic: int, current: int) -> int:

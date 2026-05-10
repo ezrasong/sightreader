@@ -5,7 +5,7 @@ SightReader AI is a prototype for generating fresh, level-appropriate sight-read
 The current implementation has two layers:
 
 - A constraint-based generator that can already create level-appropriate short pieces.
-- A training scaffold for a future Transformer model that learns token sequences from symbolic music.
+- A training scaffold for a future Transformer model that learns token sequences from a gradual sight-reading curriculum.
 
 The generator uses structured note events as the source of truth, then exports MusicXML and MIDI.
 
@@ -42,6 +42,8 @@ python3 training/build_synthetic_dataset.py \
   --pieces-per-level 200
 ```
 
+By default, the dataset builder covers every curriculum level instead of jumping straight from broad beginner material to early-intermediate material. You can still narrow it with `--levels 1 2 3`.
+
 Train a symbolic Transformer from JSONL token-id sequences:
 
 ```bash
@@ -56,6 +58,27 @@ python3 training/train_transformer.py \
 ```
 
 The trainer slices long pieces into overlapping context windows, keeps a seeded validation split, and writes training history into the checkpoint.
+
+## Docker and Unraid
+
+The repository includes a Docker image and Unraid template for running dataset generation and training as a job container.
+
+- `Dockerfile` builds the trainer image.
+- `compose.yaml` provides the local/CI Compose service for smoke testing.
+- `docker/entrypoint.sh` supports `all`, `build-dataset`, `train`, `test`, and `shell` job modes.
+- `templates/sightreader-ai-trainer.xml` is the Unraid template.
+- `ca_profile.xml`, `LICENSE`, and `icons/sightreader-ai.svg` provide the metadata expected by Unraid Community Applications style repositories.
+- `docker/unraid/README.md` explains template settings, GPU variables, CPU fallback, and persistent output paths.
+
+The Unraid template pulls `ghcr.io/ezrasong/sightreader-ai-trainer:latest` and uses `/data` inside the container for generated datasets, vocab files, and model checkpoints, so image updates do not erase training outputs.
+
+To install manually before publishing through Community Applications, copy `templates/sightreader-ai-trainer.xml` to:
+
+```text
+/boot/config/plugins/dockerMan/templates-user/
+```
+
+Then use Docker > Add Container > User Templates.
 
 ## Project Shape
 
@@ -72,11 +95,33 @@ src/sightreader_ai/
 training/
   build_synthetic_dataset.py  Bootstrap token-id dataset builder
   train_transformer.py  PyTorch decoder-only Transformer trainer
+
+docker/
+  entrypoint.sh  Docker job entrypoint
+
+templates/
+  sightreader-ai-trainer.xml  Unraid Docker template
+
+compose.yaml  Local and CI container smoke test
 ```
 
 ## Model Direction
 
 The Transformer should learn tokenized symbolic music, not audio. A generated piece should pass through the validator before the app shows it to a student.
+
+## Curriculum Progression
+
+The synthetic bootstrap curriculum is intentionally granular so a first training run does not skip fundamentals:
+
+| Level | Focus | New material |
+| --- | --- | --- |
+| 1 | Pulse and two notes | C-D, repeats, steps, quarter/half/whole notes |
+| 2 | Three-note steps | C-D-E while staying strictly stepwise |
+| 3 | Five-finger steps | C-G range, still adjacent scale steps only |
+| 4 | First skips and rests | Thirds plus simple rests |
+| 5 | One-octave C major | Full C-major octave before adding new keys |
+| 6 | Neighbor keys and eighths | C/G/F, light eighth-note use, controlled density |
+| 7 | Early intermediate | Wider range, more keys, dotted-quarter rhythms, leaps up to a fifth |
 
 The intended pipeline is:
 

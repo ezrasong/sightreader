@@ -46,14 +46,19 @@ def write_musicxml(piece: Piece, path: Path) -> None:
 
         for note_event in notes_by_measure.get(measure_number, []):
             note = SubElement(measure, "note")
-            pitch = SubElement(note, "pitch")
-            step, alter, octave = midi_to_musicxml_pitch(note_event.pitch)
-            SubElement(pitch, "step").text = step
-            if alter is not None:
-                SubElement(pitch, "alter").text = str(alter)
-            SubElement(pitch, "octave").text = str(octave)
+            if note_event.pitch is None:
+                SubElement(note, "rest")
+            else:
+                pitch = SubElement(note, "pitch")
+                step, alter, octave = midi_to_musicxml_pitch(note_event.pitch)
+                SubElement(pitch, "step").text = step
+                if alter is not None:
+                    SubElement(pitch, "alter").text = str(alter)
+                SubElement(pitch, "octave").text = str(octave)
             SubElement(note, "duration").text = str(_duration_to_divisions(note_event.duration))
             SubElement(note, "type").text = _duration_type(note_event.duration)
+            if _duration_is_dotted(note_event.duration):
+                SubElement(note, "dot")
 
     pretty_xml = minidom.parseString(tostring(root, encoding="utf-8")).toprettyxml(indent="  ")
     path.write_text(pretty_xml, encoding="utf-8")
@@ -67,8 +72,9 @@ def write_midi(piece: Piece, path: Path) -> None:
     current_tick = 0
     for note in piece.notes:
         duration_ticks = _beats_to_ticks(note.duration)
-        events.append((current_tick, bytes([0x90, note.pitch, note.velocity])))
-        events.append((current_tick + duration_ticks, bytes([0x80, note.pitch, 0])))
+        if note.pitch is not None:
+            events.append((current_tick, bytes([0x90, note.pitch, note.velocity])))
+            events.append((current_tick + duration_ticks, bytes([0x80, note.pitch, 0])))
         current_tick += duration_ticks
     events.append((current_tick, b"\xff\x2f\x00"))
 
@@ -121,6 +127,10 @@ def _duration_type(duration: Fraction) -> str:
         Fraction(1): "quarter",
         Fraction(1, 2): "eighth",
     }.get(duration, "quarter")
+
+
+def _duration_is_dotted(duration: Fraction) -> bool:
+    return duration in {Fraction(3), Fraction(3, 2)}
 
 
 def _key_fifths(key: str) -> int:

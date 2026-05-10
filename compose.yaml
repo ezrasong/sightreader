@@ -1,0 +1,18 @@
+services:
+  sightreader-ai-trainer:
+    image: ghcr.io/ezrasong/sightreader-ai-trainer:latest
+    build:
+      context: .
+    volumes:
+      - ./data:/data
+    environment:
+      SIGHTREADER_DATA_DIR: /data
+      PIECES_PER_LEVEL: "200"
+      BARS: "8"
+      EPOCHS: "20"
+      BATCH_SIZE: "32"
+      CONTEXT: "256"
+      STRIDE: "128"
+      VAL_SPLIT: "0.1"
+      DEVICE: auto
+    command: all
